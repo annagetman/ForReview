@@ -1,5 +1,6 @@
 import { test, expect } from "@playwright/test";
 import { LoginPage } from "../pages/LoginPage";
+import { SecureAreaPage } from "../pages/SecureAreaPage";
 
 test.describe("Login Form Tests", () => {
   test.beforeEach(async ({ page }) => {
@@ -9,9 +10,11 @@ test.describe("Login Form Tests", () => {
 
   test("Successful login and message update", async ({ page }) => {
     const loginPage = new LoginPage(page);
+    const secureAreaPage = new SecureAreaPage(page);
     const usernameValid = process.env.USERNAMEValid;
     const passwordValid = process.env.PASSWORDValid;
 
+    // Login
     await loginPage.login(usernameValid, passwordValid);
 
     const message = await loginPage.getFlashMessage();
@@ -19,6 +22,11 @@ test.describe("Login Form Tests", () => {
 
     await expect(page).toHaveURL(/.*secure/);
     await expect(page.locator("h2")).toContainText("Secure Area");
+
+    // Logout
+    await secureAreaPage.logout();
+    const logoutMessage = await loginPage.getFlashMessage();
+    expect(logoutMessage).toContain("You logged out of the secure area!");
 
     // Example of how to fill in the form and submit without using the LoginPage class
     // await page.fill('#username', usernameValid);
